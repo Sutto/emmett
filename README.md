@@ -37,6 +37,7 @@ config.emmett.name        = "Your App"
 config.emmett.index_page  = "doc/api.md" # Relative to doc/
 config.emmett.section_dir = "doc/api" # Relative to doc/
 config.emmett.output_dir  = "doc/generated-api"
+config.emmett.template    = :default
 ```
 
 It will use sane defaults (all being the same as above except the name, which is
@@ -56,6 +57,7 @@ Emmett::RakeTask.new :docs do |t|
   t.index_page  = "api.md"
   t.section_dir = "api"
   t.output_dir  = "output"
+  t.template    = :default
 end
 ```
 
