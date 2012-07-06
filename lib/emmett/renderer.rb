@@ -37,7 +37,7 @@ module Emmett
     private
 
     def output_path
-      @output_path ||= configuration.output_path
+      @output_path ||= configuration.output_dir
     end
 
     def copy_static

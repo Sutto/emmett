@@ -15,7 +15,7 @@ module Emmett
     end
 
     def index_document
-      @index_document ||= render_path(configuration.index_path)
+      @index_document ||= render_path(configuration.index_page, :index)
     end
 
     def inner_documents
@@ -54,8 +54,7 @@ module Emmett
     end
 
     def render!
-      p all_urls
-      Renderer.new.tap do |renderer|
+      Renderer.new(configuration).tap do |renderer|
         renderer.prepare_output
         renderer.global_context = {
           links:     inner_links,
@@ -79,12 +78,11 @@ module Emmett
     private
 
     def render_document(renderer, template_name, document, context = {})
-      puts "Rendering #{document.title}"
       renderer.render_to document.to_path_name, template_name, context.merge(content: document.highlighted_html)
     end
 
-    def render_path(path)
-      Document.from_path path
+    def render_path(path, type = :normal)
+      Document.from_path path, type
     end
 
   end

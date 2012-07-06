@@ -6,17 +6,19 @@ require 'nokogiri'
 require 'emmett/http_request_processor'
 
 module Emmett
-  class Document < Struct.new(:file_name, :content)
+  class Document < Struct.new(:file_name, :content, :type)
 
-    def self.from_path(path)
-      puts "Rendering #{path} - #{File.read(path)}"
-      Document.new path, GitHub::Markup.render(path, File.read(path))
+    def self.from_path(path, type = :normal)
+      Document.new path, GitHub::Markup.render(path, File.read(path)), type
     end
 
     def short_name
       @short_name ||= begin
-        short_name = File.basename(file_name).split(".")[0..-2].join(".")
-        short_name == "api" ? "index" : short_name
+        if type == :index
+          "index"
+        else
+          File.basename(file_name).split(".")[0..-2].join(".")
+        end
       end
     end
 

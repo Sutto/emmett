@@ -47,7 +47,7 @@ module Emmett
     end
 
     def static_path
-      @template_path ||= File.join(root, 'static')
+      @static_path ||= File.join(root, 'static')
     end
 
     def template_path
@@ -56,7 +56,7 @@ module Emmett
 
     def template_file_path(name)
       path = File.join(template_path, name)
-      File.exist?(path)
+      File.exist?(path) ? path : nil
     end
 
     def has_template?(name)
@@ -64,7 +64,7 @@ module Emmett
     end
 
     def each_static_file
-      Dir[File.join(static_path, '**/*')].select { |f| File.file?(name) }.each do |file|
+      Dir[File.join(static_path, '**/*')].select { |f| File.file?(f) }.each do |file|
         relative_name = file.gsub(static_path, "")
         yield relative_name, file
       end
