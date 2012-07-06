@@ -1,0 +1,19 @@
+<div class='navbar navbar-fixed-top' id="page-navigation">
+  <div class='navbar-inner'>
+    <div class='container'>
+      <a href="./index.html" class="brand">{{site_name}}</a>
+      <ul class='nav pull-right'>
+        {{#links}}
+          <li class='dropdown'>
+            <a href='{{link}}' class='dropdown-toggle{{#is_current_doc}} current-document{{/is_current_doc}}' data-toggle='dropdown'>{{title}} <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+              {{#sections}}
+                <li><a href="{{../link}}#{{hash}}">{{name}}</a></li>
+              {{/sections}}
+            </ul>
+          </li>
+        {{/links}}
+      </ul>
+    </div>
+  </div>
+</div>

@@ -5,14 +5,12 @@ require 'pathname'
 module Emmett
   class Renderer
 
-    attr_reader :handlebars, :root_path, :global_context, :output_path, :template_path, :static_path
+    attr_reader :handlebars, :global_context, :configuration, :templates
     attr_writer :global_context
 
-    def initialize(root_path)
-      @root_path      = root_path
-      @template_path  = File.join root_path, 'templates'
-      @output_path    = File.join root_path, 'output'
-      @static_path    = File.join root_path, 'static'
+    def initialize(configuration)
+      @configuration  = configuration
+      @templates      = configuration.to_template
       @handlebars     = Handlebars::Context.new
       @cache          = {}
       @global_context = {}
@@ -38,15 +36,15 @@ module Emmett
 
     private
 
+    def output_path
+      @output_path ||= configuration.output_path
+    end
+
     def copy_static
-      static = Dir[File.join(static_path, "**/*")]
-      static.each do |file|
-        new_path = file.gsub static_path, output_path
-        if File.directory? file
-          FileUtils.mkdir new_path
-        else
-          FileUtils.cp file, new_path
-        end
+      templates.each_static_file do |file_name, path|
+        destination = File.join(output_path, file_name)
+        FileUtils.mkdir_p File.dirname(destination)
+        FileUtils.cp path, destination
       end
     end
 
@@ -61,8 +59,8 @@ module Emmett
 
     def load_template(name)
       @cache[name.to_s] ||= begin
-        content = File.read File.join(template_path, "#{name}.handlebars")
-        handlebars.compile content
+        path = templates.template_file_path("#{name}.handlebars")
+        path && handlebars.compile(File.read(path))
       end
     end
 

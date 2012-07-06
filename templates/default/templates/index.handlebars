@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  {{>head}}
+  <body>
+    {{>navigation}}
+
+    <div class='container'>
+
+      <div id='content'>
+        {{{content}}}
+      </div>
+
+      <section id="document-index">
+        <h2>API Index</h2>
+        <div id='inner-index'>
+          <ul>
+            {{#links}}
+              <li>
+                <h3><a href="{{link}}">{{title}}</a></h4>
+                <ul class="sections">
+                  {{#sections}}
+                    <li><a href="{{../link}}#{{hash}}">{{name}}</a></li>
+                  {{/sections}}
+                </ul>
+              </li>
+            {{/links}}
+          </ul>
+        </div>
+      </section>
+
+      {{>footer}}
+    </div>
+  </body>
+</html>

@@ -5,7 +5,7 @@ module Emmett
     R = ::Rails
 
     config.emmett             = Emmett::Configuration.new
-    config.emmett.name        = Rails.root.basename.to_s.titelize
+    config.emmett.name        = File.basename(Dir.pwd).titleize
     config.emmett.index_page  = "doc/api.md"
     config.emmett.section_dir = "doc/api"
     config.emmett.output_dir  = "doc/generated-api"

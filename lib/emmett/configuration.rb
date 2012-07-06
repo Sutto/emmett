@@ -1,3 +1,5 @@
+require 'emmett/template'
+
 module Emmett
   class Configuration
 
@@ -12,11 +14,16 @@ module Emmett
       errors << "The index_page file must exist" unless index_page && File.exist?(index_page)
       errors << "The section_dir directory must exist" unless section_dir && File.directory?(section_dir)
       errors << "The output_dir must be set" unless output_dir
+      errors << "The specified template does not exist" unless to_template
       if errors.any?
         message = "Your configuration is invalid:\n"
         errors.each { |e| message << "* #{e}\n" }
         raise Error.new(message)
       end
+    end
+
+    def to_template
+      @template_instance ||= Template[template]
     end
 
   end

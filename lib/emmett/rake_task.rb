@@ -26,7 +26,7 @@ module Emmett
       desc "Generates api documentation using emmett" unless ::Rake.application.last_comment
       task task_name do
         configuration.verify!
-        # TODO: Run emmett here.
+        Emmett::DocumentManager.render! configuration
       end
 
     end

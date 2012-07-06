@@ -9,6 +9,7 @@ module Emmett
   class Document < Struct.new(:file_name, :content)
 
     def self.from_path(path)
+      puts "Rendering #{path} - #{File.read(path)}"
       Document.new path, GitHub::Markup.render(path, File.read(path))
     end
 

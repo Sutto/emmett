@@ -8,19 +8,19 @@ module Emmett
       new(*args).render!
     end
 
-    def initialize(root_path)
-      @root_path = root_path
-      @index_path = File.join(root_path, 'api.md')
-      @inner_path = File.join(root_path, 'api')
+    attr_reader :configuration
+
+    def initialize(configuration)
+      @configuration = configuration
     end
 
     def index_document
-      @index_document ||= render_path(@index_path)
+      @index_document ||= render_path(configuration.index_path)
     end
 
     def inner_documents
       @inner_documents ||= begin
-        Dir[File.join(@inner_path, "**/*.md")].map do |path|
+        Dir[File.join(configuration.section_dir, "**/*.md")].map do |path|
           render_path path
         end
       end
@@ -57,7 +57,10 @@ module Emmett
       p all_urls
       Renderer.new.tap do |renderer|
         renderer.prepare_output
-        renderer.global_context = {css:   Pygments.css, links: inner_links}
+        renderer.global_context = {
+          links:     inner_links,
+          site_name: configuration.name
+        }
         render renderer
       end
     end
