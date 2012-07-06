@@ -1,7 +1,8 @@
 module Emmett
   class Template
-
     class Error < StandardError; end
+
+    REQUIRED_TEMPLATES = %w(index section)
 
     class << self
 
@@ -33,16 +34,25 @@ module Emmett
       @root = root.to_s
     end
 
+    def template_format; ".handlebars"; end
+
     def verify!
       errors = []
       errors << "Ensure the root directory exists" unless File.directory?(root)
       errors << "Ensure the name is set" unless name
       errors << "Ensure the template has a templates subdirectory" unless File.directory?(template_path)
       errors << "Ensure the template static path is a directory if present" if File.exist?(static_path) && !File.directory?(static_path)
+      errors << "Missing the following files in your template: #{missing_templates.join(", ")}" if missing_templates.any?
       if errors.any?
         message = "The following errors occured trying to add your template:\n"
         errors.each { |e| message << "* #{message}\n" }
         raise Error.new(mesage)
+      end
+    end
+
+    def missing_templates
+      @missing_templates ||= REQUIRED_TEMPLATES.select do |template|
+        template_file_path(template).nil?
       end
     end
 
@@ -55,7 +65,7 @@ module Emmett
     end
 
     def template_file_path(name)
-      path = File.join(template_path, name)
+      path = File.join(template_path, "#{name}.#{template_format}")
       File.exist?(path) ? path : nil
     end
 

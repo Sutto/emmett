@@ -59,7 +59,7 @@ module Emmett
 
     def load_template(name)
       @cache[name.to_s] ||= begin
-        path = templates.template_file_path("#{name}.handlebars")
+        path = templates.template_file_path name
         path && handlebars.compile(File.read(path))
       end
     end
