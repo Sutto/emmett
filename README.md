@@ -41,7 +41,8 @@ config.emmett.template    = :default
 ```
 
 It will use sane defaults (all being the same as above except the name, which is
-the rails root dir titleize. I do suggest changing this).
+the rails root dir titleize. I do suggest changing this). In Rails, it will
+be available via `rake doc:api`.
 
 ### Emmett on it's own.
 
