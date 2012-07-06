@@ -7,6 +7,39 @@ them and generate a nice, usable website people can use to consume the documenta
 
 It doesn't automate the docs or the like - it just does the simplest thing possible.
 
+## Doc Generation
+
+Emmett is simply a pipeline for building documentation. It expects very little, namely:
+
+* There is a specific api index page.
+* There is a directory holding all API section information as markdown files
+* Each page has a h1 with the section name
+* Each page has one or more h2's with an api endpoint described inside a single one.
+
+From this, it will generate compiled HTML from a template (the default is built on bootstrap)
+with:
+
+* Markdown processed much like on GitHub.
+* A nav bar with your api name + drop downs of section titles.
+* An index of endpoints in each section before any of the endpoints are described.
+* An api index on the home page.
+
+It'll automatically use Pygments for code highlighting, so for http examples we encourage the syntax like:
+
+    ```http
+    GET /1/your/endpoint HTTP/1.1
+    Authorization: Bearer TOKEN
+    ``
+
+    ```http
+    HTTP/1.1 200 OK
+    Content-Type: text/plain
+
+    Alrighty then!
+    ```
+
+AKA, Calls described in the form of a simplified request lifecycle.
+
 ## Installation
 
 Add this line to your application's Gemfile:
