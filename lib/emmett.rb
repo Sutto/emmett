@@ -1,5 +1,5 @@
 require "emmett/version"
 
 module Emmett
-  # Your code goes here...
+  require 'emmett/document_manager'
 end
