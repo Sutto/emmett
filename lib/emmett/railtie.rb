@@ -9,6 +9,7 @@ module Emmett
     config.emmett.index_page  = "doc/api.md"
     config.emmett.section_dir = "doc/api"
     config.emmett.output_dir  = "doc/generated-api"
+    config.emmett.json_path   = "doc/api.json"
     config.emmett.template    = :default
 
     rake_tasks do

@@ -135,12 +135,27 @@ footer.footer {
   color: #444;
 }
 
-#document-index .sections li {
+#document-index .endpoints li {
   line-height: 1.8em;
 }
 
-#document-index .sections a {
+#document-index .endpoints a {
   font-size: 1em;
   font-weight: normal;
   color: #666;
+}
+
+#page-navigation .dropdown  .group-subtitle {
+  font-weight: bold;
+}
+
+#page-navigation .dropdown ul.endpoints {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+#page-navigation .dropdown ul.endpoints li a {
+  padding-left: 25px;
 }

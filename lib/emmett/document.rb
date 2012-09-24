@@ -6,10 +6,126 @@ require 'nokogiri'
 require 'emmett/http_request_processor'
 
 module Emmett
+
+  def self.normalize_name(text)
+    text.strip.downcase.gsub(/\W+/, '-').gsub(/-+/, '-').gsub(/(^-|-$)/, '')
+  end
+
+  class Section < Struct.new(:name)
+
+    def groups
+      @groups ||= []
+    end
+
+    def groups=(value)
+      @groups = Array value
+    end
+
+    def singular?
+      @groups.one?
+    end
+
+    def ==(other)
+      other.is_a?(self.class) && other.name == name
+    end
+
+    def to_hash
+      {
+        :name     => name,
+        :singular => singular?,
+        :groups   => groups.map(&:to_hash)
+      }.tap do |result|
+        if singular?
+          group = groups.first.to_hash
+          result[:endpoints] = group[:endpoints]
+          result[:url]       = group[:url]
+        end
+      end
+    end
+
+  end
+
+  class Group < Struct.new(:name)
+
+    attr_reader :slug, :document
+
+    def ==(other)
+      other.is_a?(self.class) && other.name == name
+    end
+
+    def initialize(name, document)
+      @slug = Emmett.normalize_name name
+      @document = document
+      super name
+    end
+
+    def to_hash
+      {
+        :name => name,
+        :slug => slug,
+        :endpoints => endpoints.map(&:to_hash),
+        :url       => document.to_path_name
+      }
+    end
+
+    def endpoints
+      @endpoints ||= []
+    end
+
+    def endpoints=(value)
+      @endpoints = Array value
+    end
+
+  end
+
+  class Endpoint < Struct.new(:name)
+
+    def ==(other)
+      other.is_a?(self.class) && other.name == name
+    end
+
+    attr_reader :slug, :document
+
+    def initialize(name, document)
+      @slug = Emmett.normalize_name name
+      @document = document
+      super name
+    end
+
+    def to_hash
+      {
+        :name => name,
+        :slug => slug,
+        :url  => "#{document.to_path_name}##{slug}"
+      }
+    end
+
+  end
+
   class Document < Struct.new(:file_name, :content, :type)
 
     def self.from_path(path, type = :normal)
       Document.new path, GitHub::Markup.render(path, File.read(path)), type
+    end
+
+    def group_names
+      @group_name ||= document.css('h1').map(&:text)
+    end
+
+    def endpoint_names
+      @endpoint_names ||= document.css('h2').map(&:text)
+    end
+
+    def groups
+      @groups ||= group_names.map do |name|
+        group = Group.new(name, self)
+        group.endpoints = endpoints
+        group
+      end
+    end
+
+    def endpoints
+      @endpoints ||= endpoint_names.map { |name| Endpoint.new(name, self) }
     end
 
     def short_name
@@ -26,19 +142,8 @@ module Emmett
       @document ||= Nokogiri::HTML(content)
     end
 
-    def sections
-      @sections ||= document.css('h2').map(&:text)
-    end
-
-    def section_mapping
-      @section_mapping ||= sections.inject({}) do |acc, current|
-        acc[current] = current.strip.downcase.gsub(/\W+/, '-').gsub(/-+/, '-').gsub(/(^-|-$)/, '')
-        acc
-      end
-    end
-
     def title
-      @title ||= document.at_css('h1').text
+      @title ||= group_names.first
     end
 
     def highlighted_html
@@ -52,7 +157,7 @@ module Emmett
           block.replace highlighted_fragment
         end
 
-        mapping = section_mapping
+        mapping = endpoints.inject({}) { |acc, e| acc[e.name] = e.slug; acc }
         doc.css('h2').each do |header|
           if (identifier = mapping[header.text])
             header[:id] = identifier
@@ -74,15 +179,11 @@ module Emmett
         html << "<h2>Endpoints</h2>"
         html << "<ul id='endpoints'>"
 
-        section_mapping.each_pair do |section, slug|
-          html << "<li><a href='##{slug}'>#{section}</a></li>"
+        endpoints.each do |endpoint|
+          html << "<li><a href='##{endpoint.slug}'>#{endpoint.name}</a></li>"
         end
         html << "</ul>"
       end.join("")
-    end
-
-    def iterable_section_mapping
-      section_mapping.map { |(n,v)| {name: n, hash: v} }
     end
 
     def to_path_name
@@ -103,6 +204,8 @@ module Emmett
         blocks
       end
     end
+
+    # Extra / process HTTP blocks to get extra information.
 
     def http_blocks
       @http_blocks ||= code_blocks.select { |r| r.first == "http" }.map { |r| r[1..-1] }

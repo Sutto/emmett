@@ -34,7 +34,7 @@ module Emmett
       @root = root.to_s
     end
 
-    def template_format; ".handlebars"; end
+    def template_format; "handlebars"; end
 
     def verify!
       errors = []
@@ -45,8 +45,8 @@ module Emmett
       errors << "Missing the following files in your template: #{missing_templates.join(", ")}" if missing_templates.any?
       if errors.any?
         message = "The following errors occured trying to add your template:\n"
-        errors.each { |e| message << "* #{message}\n" }
-        raise Error.new(mesage)
+        errors.each { |e| message << "* #{e}\n" }
+        raise Error.new(message)
       end
     end
 

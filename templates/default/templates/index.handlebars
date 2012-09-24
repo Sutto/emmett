@@ -14,16 +14,12 @@
         <h2>API Index</h2>
         <div id='inner-index'>
           <ul>
-            {{#links}}
+            {{#groups}}
               <li>
-                <h3><a href="{{link}}">{{title}}</a></h4>
-                <ul class="sections">
-                  {{#sections}}
-                    <li><a href="{{../link}}#{{hash}}">{{name}}</a></li>
-                  {{/sections}}
-                </ul>
+                <h3><a href="{{url}}">{{name}}</a></h4>
+                <ul class="endpoints">{{>endpoints}}</ul>
               </li>
-            {{/links}}
+            {{/groups}}
           </ul>
         </div>
       </section>

@@ -1,5 +1,6 @@
 require 'emmett/document'
 require 'emmett/renderer'
+require 'set'
 
 module Emmett
   class DocumentManager
@@ -26,16 +27,15 @@ module Emmett
       end
     end
 
-    def inner_links
-      @inner_links ||= inner_documents.map do |doc|
-        {
-          doc:      doc,
-          title:    doc.title,
-          short:    doc.short_name,
-          link:     "./#{doc.short_name}.html",
-          sections: doc.iterable_section_mapping
-        }
-      end.sort_by { |r| r[:title].downcase }
+    def indexed_documents
+      @indexed_documents ||= inner_documents.inject({}) do |acc, document|
+        acc[document.short_name] = document
+        acc
+      end
+    end
+
+    def sections
+      @sections ||= Hash.new.tap { |s| process_sections s }.values
     end
 
     def render_index(renderer)
@@ -49,6 +49,7 @@ module Emmett
     end
 
     def render(renderer)
+      process_sections
       render_index renderer
       render_documents renderer
     end
@@ -56,8 +57,10 @@ module Emmett
     def render!
       Renderer.new(configuration).tap do |renderer|
         renderer.prepare_output
+        all_groups = sections.map(&:groups).flatten.sort_by(&:name).uniq
         renderer.global_context = {
-          links:     inner_links,
+          sections:  sections.map(&:to_hash),
+          groups:    all_groups.map(&:to_hash),
           site_name: configuration.name
         }
         render renderer
@@ -76,6 +79,25 @@ module Emmett
     end
 
     private
+
+    def process_sections(into = {})
+      configuration_sections = Array(configuration.from_json['sections'])
+      seen                   = Set.new
+      configuration_sections.each do |s|
+        name           = s['name']
+        section        = (into[name] ||= Section.new(name))
+        entries        = Array(s['children']).map { |n| indexed_documents[n] }.compact.map(&:groups).flatten.uniq
+        section.groups += entries
+        seen           += entries
+      end
+      missing = (inner_documents.map(&:groups).flatten.uniq - seen.to_a)
+      missing.each do |group|
+        # This document doesn't have a section, so we need to specify it.
+        section         = (into[group.name] ||= Section.new(group.name))
+        section.groups << group
+      end
+      into
+    end
 
     def render_document(renderer, template_name, document, context = {})
       renderer.render_to document.to_path_name, template_name, context.merge(content: document.highlighted_html)
